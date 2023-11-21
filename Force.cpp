@@ -1,4 +1,7 @@
 
+#ifndef FORCE
+#define FORCE
+
 class Force{
 
 protected:
@@ -34,3 +37,5 @@ private:
 public:
     Gravity(float affected_mass) : Force(0, -(affected_mass * GRAVITY_PULL)){};
 };
+
+#endif
