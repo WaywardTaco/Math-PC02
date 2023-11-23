@@ -29,13 +29,4 @@ public:
 
 };
 
-class Gravity : public Force{
-
-private:
-    const float GRAVITY_PULL = 5.0;
-
-public:
-    Gravity(float affected_mass) : Force(0, -(affected_mass * GRAVITY_PULL)){};
-};
-
 #endif

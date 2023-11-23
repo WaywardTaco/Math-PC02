@@ -5,10 +5,14 @@
 #include <cmath>
 #include "Force.cpp"
 
+#include <iostream>
+
+using namespace std;
+
 class Ball{
 
 private:
-    float   ballMass,
+    float   mass_kg,
             radius,
             x = 0,
             y = 0,
@@ -21,14 +25,14 @@ private:
             x_acceleration = 0,
             y_acceleration = 0;
 
-    float   upperWall_y,
-            lowerWall_y,
-            leftWall_x,
-            rightWall_x;
+    float   upperWall_y = 99999999,
+            lowerWall_y = -99999999,
+            leftWall_x = -99999999,
+            rightWall_x = 99999999;
 
 public:
-    Ball(float mass, float diameter){
-        this->ballMass = mass;
+    Ball(float massKg, float diameter){
+        this->mass_kg = massKg;
         this->radius = diameter / 2.0;
     }
 
@@ -40,8 +44,8 @@ public:
     }
 
     void applyForce(Force force){
-        x_acceleration += force.getX() / this->ballMass;
-        y_acceleration += force.getY() / this->ballMass;
+        x_acceleration = force.getX() / this->mass_kg;
+        y_acceleration = force.getY() / this->mass_kg;
     }
 
     void update(float timestep_seconds){
@@ -52,13 +56,15 @@ public:
         this->x_velocity = this->x_futureVelocity;
         this->y_velocity = this->y_futureVelocity;
         
+        cout << "Ball: (" << x << ", " << y << ") V: (" << x_velocity << ", " << y_velocity << ") A: (" << x_acceleration << ", " << y_acceleration << ")" << endl;
+
         this->x_future = this->x + this->x_velocity*timestep_seconds + x_acceleration*timestep_seconds*timestep_seconds/2;
         this->y_future = this->y + this->y_velocity*timestep_seconds + y_acceleration*timestep_seconds*timestep_seconds/2;
 
         this->x_futureVelocity = this->x_velocity + this->x_acceleration*timestep_seconds;
-        this->y_futureVelocity = this->x_velocity + this->x_acceleration*timestep_seconds;
+        this->y_futureVelocity = this->y_velocity + this->y_acceleration*timestep_seconds;
 
-        while(processCollisions(timestep_seconds));
+        processCollisions(timestep_seconds);
 
     }
 
@@ -107,14 +113,24 @@ public:
             x_future = temp_coord + temp_velocity*remainingTime + x_acceleration*remainingTime*remainingTime/2;
             x_futureVelocity = temp_velocity + x_acceleration*remainingTime;
         }
+
+        return true;
     }
 
-    float getFutureX(){
-        return x_future;
+    float getX(){
+        return x;
     }
 
-    float getFutureY(){
-        return y_future;
+    float getY(){
+        return y;
+    }
+
+    float getXVelocity(){
+        return x_velocity;
+    }
+
+    float getYVelocity(){
+        return y_velocity;
     }
 
     float getRadius(){
@@ -122,7 +138,7 @@ public:
     }
 
     float getMass(){
-        return mass;
+        return mass_kg;
     }
     
 };
