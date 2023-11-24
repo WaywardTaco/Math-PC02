@@ -71,48 +71,54 @@ public:
     bool processCollisions(float in_timestep_seconds){
         bool    collidedUpper   = y_future + radius >= upperWall_y, 
                 collidedLower   = y_future - radius <= lowerWall_y, 
-                collidedLeft    = x_future + radius >= rightWall_x, 
-                collidedRight   = x_future - radius <= leftWall_x;
+                collidedRight   = x_future + radius >= rightWall_x, 
+                collidedLeft    = x_future - radius <= leftWall_x;
 
         if(!collidedUpper && !collidedLower && !collidedLeft && !collidedRight)
             return false;
 
-        float A, B, C;
+        float A, B, C, dt;
 
         if(collidedUpper){
             A = y_acceleration;
             B = y_velocity;
             C = y - (upperWall_y - radius);
+            dt = (sqrt(B*B - 2*A*C) - B)/A;
         } else if (collidedLower){
             A = y_acceleration;
             B = y_velocity;
             C = y - (lowerWall_y + radius);
+            dt = (- sqrt(B*B - 2*A*C) - B)/A;
         } else if (collidedLeft){
             A = x_acceleration;
             B = x_velocity;
             C = x - (leftWall_x + radius);
+            dt = (- sqrt(B*B - 2*A*C) - B)/A;
         } else if (collidedRight){
             A = x_acceleration;
             B = x_velocity;
             C = x - (rightWall_x - radius);
+            dt = (sqrt(B*B - 2*A*C) - B)/A;
         }
 
-        float   dt = (-B + sqrt(B*B - 2*A*C))/A,
-                remainingTime = in_timestep_seconds - dt;
+        float  remainingTime = in_timestep_seconds - dt;
+        cout << dt << ", " << remainingTime << endl;;
 
         float temp_coord, temp_velocity;
 
         if(collidedUpper || collidedLower){
             temp_coord = y + y_velocity*dt + y_acceleration*dt*dt/2;
             temp_velocity = -(y_velocity + y_acceleration*dt);    
-            y_future = temp_coord + temp_velocity*remainingTime + y_acceleration*remainingTime*remainingTime/2;
-            y_futureVelocity = temp_velocity + y_acceleration*remainingTime;
+            this->y_future = temp_coord + temp_velocity*remainingTime + y_acceleration*remainingTime*remainingTime/2;
+            this->y_futureVelocity = temp_velocity + y_acceleration*remainingTime;
         } else if (collidedLeft || collidedRight){
             temp_coord = x + x_velocity*dt + x_acceleration*dt*dt/2;
             temp_velocity = -(x_velocity + x_acceleration*dt);    
-            x_future = temp_coord + temp_velocity*remainingTime + x_acceleration*remainingTime*remainingTime/2;
-            x_futureVelocity = temp_velocity + x_acceleration*remainingTime;
+            this->x_future = temp_coord + temp_velocity*remainingTime + x_acceleration*remainingTime*remainingTime/2;
+            this->x_futureVelocity = temp_velocity + x_acceleration*remainingTime;
         }
+
+        cout << temp_coord << ", " << temp_velocity << endl;
 
         return true;
     }

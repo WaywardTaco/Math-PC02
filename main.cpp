@@ -11,7 +11,7 @@ int main(){
     Ball ball = Ball(5, 1.2);
     ball.setWalls(20, -5, -20, 20);
 
-    Force gravity = Force(0,-5*ball.getMass());
+    Force gravity = Force(30,-2*ball.getMass());
     ball.applyForce(gravity);
 
     Force extraForce = Force(1, 2);
@@ -22,7 +22,7 @@ int main(){
 
         if(i == 1 || i == 2){
 
-            ball.applyForce(extraForce);
+           // ball.applyForce(extraForce);
         }
 
         File << i*timestep << ", " << ball.getX() << ", " << ball.getY() << ", " << 
