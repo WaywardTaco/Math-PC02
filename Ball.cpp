@@ -2,127 +2,150 @@
 #ifndef BALL
 #define BALL
 
-#include <cmath>
-#include "Force.cpp"
-
 class Ball{
 
 private:
-    float   ballMass,
+    float   mass_kg,
             radius,
+            k = 0,
             x = 0,
             y = 0,
-            x_future = 0,
-            y_future = 0,
             x_velocity = 0,
             y_velocity = 0,
-            x_futureVelocity = 0,
-            y_futureVelocity = 0,
             x_acceleration = 0,
             y_acceleration = 0;
 
-    float   upperWall_y,
-            lowerWall_y,
-            leftWall_x,
-            rightWall_x;
+    Force forceApplied = Force();
+
+    float   upperWallBuffer = 99999999,
+            lowerWallBuffer = -99999999,
+            leftWallBuffer = -99999999,
+            rightWallBuffer = 99999999;
 
 public:
-    Ball(float mass, float diameter){
-        this->ballMass = mass;
+    Ball(float massKg, float diameter){
+        this->mass_kg = massKg;
         this->radius = diameter / 2.0;
     }
 
     void setWalls(float upper_y, float lower_y, float left_x, float right_x){
-        this->upperWall_y = upper_y;
-        this->lowerWall_y = lower_y;
-        this->leftWall_x = left_x;
-        this->rightWall_x = right_x;
+        this->upperWallBuffer = upper_y - radius;
+        this->lowerWallBuffer = lower_y + radius;
+        this->leftWallBuffer = left_x + radius;
+        this->rightWallBuffer = right_x - radius;
+    }
+
+    void teleportTo(float x, float y){
+        this->x = x;
+        this->y = y;
     }
 
     void applyForce(Force force){
-        x_acceleration += force.getX() / this->ballMass;
-        y_acceleration += force.getY() / this->ballMass;
+        this->forceApplied.addForce(force);
     }
 
-    void update(float timestep_seconds){
+    void utilizeForces(){
+        this->x_acceleration = forceApplied.getX() / mass_kg;
+        this->y_acceleration = forceApplied.getY() / mass_kg;
 
-        this->x = this->x_future;
-        this->y = this->y_future;
+        this->forceApplied = Force();
+    }
 
-        this->x_velocity = this->x_futureVelocity;
-        this->y_velocity = this->y_futureVelocity;
+    void updatePhysics(float timestep){
+
+        float
+            x_future = x + x_velocity*timestep + x_acceleration*timestep*timestep/2,
+            y_future = y + y_velocity*timestep + y_acceleration*timestep*timestep/2;
+
+        this->k = 0;
+
+        do{
+
+        bool    
+            collideUp       = y_future >= upperWallBuffer, 
+            collideLow      = y_future <= lowerWallBuffer, 
+            collideRight    = x_future >= rightWallBuffer, 
+            collideLeft     = x_future <= leftWallBuffer;
+
+        if(!collideLeft && !collideLow && !collideRight && !collideUp){
+
+            this->x_velocity += x_acceleration*timestep;
+            this->y_velocity += y_acceleration*timestep;
+
+            break;
+        }
+
+        float
+            nowCoord = y,
+            *futureCoord = &y_future,
+            *velocity = &this->y_velocity,
+            acceleration = y_acceleration,
+            buffer = lowerWallBuffer;
         
-        this->x_future = this->x + this->x_velocity*timestep_seconds + x_acceleration*timestep_seconds*timestep_seconds/2;
-        this->y_future = this->y + this->y_velocity*timestep_seconds + y_acceleration*timestep_seconds*timestep_seconds/2;
+        if(collideLow);
+        else if(collideUp)
+            buffer = upperWallBuffer;
+        else if (collideLeft || collideRight){
+            nowCoord = x;
+            futureCoord = &x_future;
+            velocity = &this->x_velocity;
+            acceleration = x_acceleration;
+            buffer = leftWallBuffer;
 
-        this->x_futureVelocity = this->x_velocity + this->x_acceleration*timestep_seconds;
-        this->y_futureVelocity = this->x_velocity + this->x_acceleration*timestep_seconds;
-
-        while(processCollisions(timestep_seconds));
-
-    }
-
-    bool processCollisions(float in_timestep_seconds){
-        bool    collidedUpper   = y_future + radius >= upperWall_y, 
-                collidedLower   = y_future - radius <= lowerWall_y, 
-                collidedLeft    = x_future + radius >= rightWall_x, 
-                collidedRight   = x_future - radius <= leftWall_x;
-
-        if(!collidedUpper && !collidedLower && !collidedLeft && !collidedRight)
-            return false;
-
-        float A, B, C;
-
-        if(collidedUpper){
-            A = y_acceleration;
-            B = y_velocity;
-            C = y - (upperWall_y - radius);
-        } else if (collidedLower){
-            A = y_acceleration;
-            B = y_velocity;
-            C = y - (lowerWall_y + radius);
-        } else if (collidedLeft){
-            A = x_acceleration;
-            B = x_velocity;
-            C = x - (leftWall_x + radius);
-        } else if (collidedRight){
-            A = x_acceleration;
-            B = x_velocity;
-            C = x - (rightWall_x - radius);
+            if(collideRight)
+                buffer = rightWallBuffer;
         }
 
-        float   dt = (-B + sqrt(B*B - 2*A*C))/A,
-                remainingTime = in_timestep_seconds - dt;
+        float D = std::sqrt( *velocity * *velocity - 2 * acceleration * (nowCoord - buffer) ) / acceleration;
 
-        float temp_coord, temp_velocity;
+        if(acceleration == 0){
+            this->k = (buffer - nowCoord) / *velocity;
+        } else if (collideLow)
+            this->k = - *velocity / acceleration - D;
+        else if (collideUp || collideRight)
+            this->k = - *velocity / acceleration + D;
+        else if (collideLeft)
+            this->k = - *velocity / acceleration - D;
 
-        if(collidedUpper || collidedLower){
-            temp_coord = y + y_velocity*dt + y_acceleration*dt*dt/2;
-            temp_velocity = -(y_velocity + y_acceleration*dt);    
-            y_future = temp_coord + temp_velocity*remainingTime + y_acceleration*remainingTime*remainingTime/2;
-            y_futureVelocity = temp_velocity + y_acceleration*remainingTime;
-        } else if (collidedLeft || collidedRight){
-            temp_coord = x + x_velocity*dt + x_acceleration*dt*dt/2;
-            temp_velocity = -(x_velocity + x_acceleration*dt);    
-            x_future = temp_coord + temp_velocity*remainingTime + x_acceleration*remainingTime*remainingTime/2;
-            x_futureVelocity = temp_velocity + x_acceleration*remainingTime;
-        }
+        float 
+            dt = timestep - k,
+            tempCoord = nowCoord + *velocity * k + acceleration * k * k / 2,
+            tempVelocity = -(*velocity + acceleration*k);
+
+        *futureCoord = tempCoord + tempVelocity * dt + acceleration * dt * dt /2;
+        *velocity = tempVelocity + acceleration * dt;
+
+        } while (true);
+
+        this->x = x_future;
+        this->y = y_future;
+
+        utilizeForces();
+
     }
 
-    float getFutureX(){
-        return x_future;
+    float getK(){
+        return k;
     }
 
-    float getFutureY(){
-        return y_future;
+    float getX(){
+        return x;
     }
 
-    float getRadius(){
-        return radius;
+    float getY(){
+        return y;
+    }
+
+    float getXVelocity(){
+        return x_velocity;
+    }
+
+    float getYVelocity(){
+        return y_velocity;
     }
 
     float getMass(){
-        return mass;
+        return mass_kg;
     }
     
 };
