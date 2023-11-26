@@ -11,7 +11,7 @@ const float
     Y_START = 0,
     BALL_DIAMETER = 1.2;
 const bool
-    APPLY_GRAVITY = true;
+    APPLY_GRAVITY = false;
 
 int main(){
 

@@ -104,7 +104,7 @@ public:
         }
 
         float D = sqrt( *velocity * *velocity - 2 * acceleration * (nowCoord - buffer) ) / acceleration;
-            
+
         if(collideLow)
             this->k = - *velocity / acceleration - D;
         else if(collideUp || collideRight)
