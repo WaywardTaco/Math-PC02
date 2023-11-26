@@ -105,9 +105,11 @@ public:
 
         float D = sqrt( *velocity * *velocity - 2 * acceleration * (nowCoord - buffer) ) / acceleration;
 
-        if(collideLow)
+        if(acceleration == 0){
+            this->k = (buffer - nowCoord) / *velocity;
+        } else if (collideLow)
             this->k = - *velocity / acceleration - D;
-        else if(collideUp || collideRight)
+        else if (collideUp || collideRight)
             this->k = - *velocity / acceleration + D;
         else if (collideLeft)
             this->k = - *velocity / acceleration - D;
@@ -127,9 +129,6 @@ public:
 
         utilizeForces();
 
-        cout << 
-            "T +" << timestep << ": (" << x << ", " << y << "), V: (" << 
-            x_velocity << ", " << y_velocity << "), A: (" << x_acceleration << ", " << y_acceleration << ") " << k << endl;    
     }
 
     float getK(){

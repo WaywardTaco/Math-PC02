@@ -1,7 +1,9 @@
 
+#include <iomanip>
 #include "DataLogger.cpp"
 
 const float 
+    MAX_TIME = 10.0,
     GRAVITY_PULL = -5,
     LEFT_WALL = -20,
     RIGHT_WALL = 20,
@@ -11,12 +13,14 @@ const float
     Y_START = 0,
     BALL_DIAMETER = 1.2;
 const bool
-    APPLY_GRAVITY = false;
+    APPLY_GRAVITY = true;
+const int
+    DECIMAL_PLACES = 2;
+const string
+    FILENAME = "sim.txt";
 
 int main(){
-
-    //ofstream File("Test.txt");
-    //DataLogger data = DataLogger();
+    
     float timestep = 1, ballMass = 2, appliedForceX = 15, appliedForceY = 25;
 
     cout << "Timestep per row (seconds): "; cin >> timestep; cin.ignore(); cin.clear();
@@ -36,18 +40,26 @@ int main(){
     if(APPLY_GRAVITY)
         ball.applyForce(gravity);
 
+    
+    ofstream File(FILENAME);
     float time = 0;
 
-    while(time < 10){
+    while(time <= MAX_TIME){
+
         ball.updatePhysics(timestep);
 
+        File << 
+            time << setprecision(DECIMAL_PLACES) << ", " << 
+            ball.getX() << ", " << ball.getY() << ", " << ball.getXVelocity() << ", " << 
+            ball.getYVelocity() << ", " << ball.getK() << endl;    
+ 
         if(APPLY_GRAVITY)
             ball.applyForce(gravity);
 
         time += timestep;
     }
 
-    //File.close();
+    File.close();
 
     return 0;
 }
