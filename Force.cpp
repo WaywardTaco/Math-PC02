@@ -9,6 +9,10 @@ protected:
             y = 0;
 
 public:
+    Force(){
+        
+    }
+
     Force(float x_component, float y_component){
         this->x = x_component;
         this->y = y_component;

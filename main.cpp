@@ -3,15 +3,19 @@
 
 int main(){
 
-    ofstream File("Test.txt");
-    DataLogger data = DataLogger();
+    //ofstream File("Test.txt");
+    //DataLogger data = DataLogger();
 
+    const float BALL_DIAMETER = 1.2;
+    const float GRAVITY_PULL = -5;
+    
     float timestep = 1;
+    float ballMass = 5;
 
     Ball ball = Ball(5, 1.2);
     ball.setWalls(20, -5, -20, 20);
 
-    Force gravity = Force(30,-2*ball.getMass());
+    Force gravity = Force(0,-GRAVITY_PULL*ball.getMass());
     ball.applyForce(gravity);
 
     Force extraForce = Force(1, 2);
@@ -25,11 +29,11 @@ int main(){
            // ball.applyForce(extraForce);
         }
 
-        File << i*timestep << ", " << ball.getX() << ", " << ball.getY() << ", " << 
-            ball.getXVelocity() << ", " << ball.getYVelocity() << ", k" << endl;
+        //File << i*timestep << ", " << ball.getX() << ", " << ball.getY() << ", " << 
+          //  ball.getXVelocity() << ", " << ball.getYVelocity() << ", k" << endl;
     }
 
-    File.close();
+    //File.close();
 
     return 0;
 }
