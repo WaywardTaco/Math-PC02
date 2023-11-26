@@ -2,13 +2,6 @@
 #ifndef BALL
 #define BALL
 
-#include <cmath>
-#include "Force.cpp"
-
-#include <iostream>
-
-using namespace std;
-
 class Ball{
 
 private:
@@ -103,7 +96,7 @@ public:
                 buffer = rightWallBuffer;
         }
 
-        float D = sqrt( *velocity * *velocity - 2 * acceleration * (nowCoord - buffer) ) / acceleration;
+        float D = std::sqrt( *velocity * *velocity - 2 * acceleration * (nowCoord - buffer) ) / acceleration;
 
         if(acceleration == 0){
             this->k = (buffer - nowCoord) / *velocity;

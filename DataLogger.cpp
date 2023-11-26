@@ -1,7 +1,7 @@
 
 #include <iostream>
 #include <fstream>
-#include "Ball.cpp"
+#include <cmath>
 
 using namespace std;
 

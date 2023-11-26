@@ -1,6 +1,13 @@
 
+#include <iostream>
 #include <iomanip>
-#include "DataLogger.cpp"
+#include <fstream>
+#include <cmath>
+
+#include "Force.cpp"
+#include "Ball.cpp"
+
+using namespace std;
 
 const float 
     MAX_TIME = 10.0,
@@ -17,7 +24,7 @@ const bool
 const int
     DECIMAL_PLACES = 2;
 const string
-    FILENAME = "sim.txt";
+    FILENAME = "Sim.txt";
 
 int main(){
     
@@ -40,8 +47,11 @@ int main(){
     if(APPLY_GRAVITY)
         ball.applyForce(gravity);
 
-    
     ofstream File(FILENAME);
+    
+    if(!File.is_open())
+        File.open(FILENAME);
+
     float time = 0;
 
     while(time <= MAX_TIME){
@@ -60,7 +70,8 @@ int main(){
     }
 
     File.close();
-
+    cout << "Simulation Done: Saved as " << FILENAME << endl;
+ 
     return 0;
 }
 
