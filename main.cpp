@@ -1,36 +1,50 @@
 
 #include "DataLogger.cpp"
 
+const float 
+    GRAVITY_PULL = -5,
+    LEFT_WALL = -20,
+    RIGHT_WALL = 20,
+    FLOOR = -5,
+    ROOF = 20,
+    X_START = 0,
+    Y_START = 0,
+    BALL_DIAMETER = 1.2;
+const bool
+    APPLY_GRAVITY = true;
+
 int main(){
 
     //ofstream File("Test.txt");
     //DataLogger data = DataLogger();
+    float timestep = 1, ballMass = 2, appliedForceX = 15, appliedForceY = 25;
 
-    const float BALL_DIAMETER = 1.2;
-    const float GRAVITY_PULL = -5;
-    
-    float timestep = 1;
-    float ballMass = 5;
+    cout << "Timestep per row (seconds): "; cin >> timestep; cin.ignore(); cin.clear();
 
-    Ball ball = Ball(5, 1.2);
-    ball.setWalls(20, -5, -20, 20);
+    cout << "Mass of Ball: "; cin >> ballMass; cin.ignore(); cin.clear();
+    Ball ball = Ball(ballMass, BALL_DIAMETER);
+    ball.teleportTo(X_START, Y_START);
+    ball.setWalls(ROOF, FLOOR, LEFT_WALL, RIGHT_WALL);
 
-    Force gravity = Force(0,-GRAVITY_PULL*ball.getMass());
-    ball.applyForce(gravity);
+    const Force gravity = Force(0,GRAVITY_PULL*ball.getMass());
 
-    Force extraForce = Force(1, 2);
+    cout << "Force to Apply in X: "; cin >> appliedForceX; cin.ignore(); cin.clear();
+    cout << "Force to Apply in Y: "; cin >> appliedForceY; cin.ignore(); cin.clear();
+    Force appliedForce = Force(appliedForceX, appliedForceY);
+    ball.applyForce(appliedForce);
 
-    for(int i = 0; i < 10; i++){
-        ball.update(timestep);
+    if(APPLY_GRAVITY)
         ball.applyForce(gravity);
 
-        if(i == 1 || i == 2){
+    float time = 0;
 
-           // ball.applyForce(extraForce);
-        }
+    while(time < 10){
+        ball.updatePhysics(timestep);
 
-        //File << i*timestep << ", " << ball.getX() << ", " << ball.getY() << ", " << 
-          //  ball.getXVelocity() << ", " << ball.getYVelocity() << ", k" << endl;
+        if(APPLY_GRAVITY)
+            ball.applyForce(gravity);
+
+        time += timestep;
     }
 
     //File.close();
