@@ -52,6 +52,8 @@ int main(){
     if(!File.is_open())
         File.open(FILENAME);
 
+    File << "Time, X, Y, Vx, Vy, k" << endl;
+
     float time = 0;
 
     while(time <= MAX_TIME){
